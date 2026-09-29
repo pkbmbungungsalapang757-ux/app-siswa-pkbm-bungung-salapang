@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 // Data statis paket, mapel, dan link — tidak perlu fetch dari Google Sheets lagi
 const STATIC_DATA = [
@@ -22,6 +22,7 @@ const STATIC_DATA = [
 function App() {
   const [paket, setPaket] = useState<string>("");
   const [mapel, setMapel] = useState<string>("");
+  const [activeLink, setActiveLink] = useState<string | null>(null);
 
   const handleNext = () => {
     const selectedRow = STATIC_DATA.find(
@@ -31,10 +32,27 @@ function App() {
       const redirectUrl = `${selectedRow.link}?mapel=${encodeURIComponent(
         mapel
       )}&from=pkbm`;
-      window.location.href = redirectUrl;
+      setActiveLink(redirectUrl); // tampilkan di iframe, URL browser tidak berubah
     } else {
       alert("Tidak ada link yang tersedia untuk pilihan ini.");
     }
+  };
+
+  
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type === "PKBM_KEMBALI") {
+        handleBack();
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
+
+  const handleBack = () => {
+    setActiveLink(null);
+    setPaket("");
+    setMapel("");
   };
 
   // Dapatkan paket unik
@@ -48,6 +66,20 @@ function App() {
         .map((item) => item.mapel)
         .filter((value, index, self) => value && self.indexOf(value) === index)
     : [];
+
+  // Kalau sudah pilih paket & mapel, tampilkan halaman tujuan di dalam iframe
+  if (activeLink) {
+    return (
+      <div style={{ width: "100%", height: "100vh" }}>
+        <iframe
+          src={activeLink}
+          title="Absensi"
+          allow="geolocation; camera; microphone"
+          style={{ width: "100%", height: "100%", border: "none" }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div
