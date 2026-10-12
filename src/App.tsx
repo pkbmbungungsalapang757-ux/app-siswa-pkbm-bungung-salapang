@@ -55,6 +55,12 @@ function App() {
   };
 
   const handleKembali = () => {
+    // Dibuka di dalam iframe (dari picker) → minta picker menutup iframe
+    if (window.top !== window.self) {
+      window.top?.postMessage({ type: "SISWA_KEMBALI" }, "*");
+      return;
+    }
+
     // Ada riwayat browser → kembali ke halaman sebelum membuka halaman ini
     if (window.history.length > 1) {
       window.history.back();
