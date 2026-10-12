@@ -38,7 +38,6 @@ function App() {
     }
   };
 
-  
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.data?.type === "PKBM_KEMBALI") {
@@ -53,6 +52,23 @@ function App() {
     setActiveLink(null);
     setPaket("");
     setMapel("");
+  };
+
+  const handleKembali = () => {
+    // Ada riwayat browser → kembali ke halaman sebelum membuka halaman ini
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+
+    // Tab baru tanpa riwayat → pakai referrer jika ada
+    if (document.referrer) {
+      window.location.replace(document.referrer);
+      return;
+    }
+
+    // Tidak ada halaman sebelumnya
+    alert("Tidak ada halaman sebelumnya.");
   };
 
   // Dapatkan paket unik
@@ -165,6 +181,23 @@ function App() {
         }}
       >
         Selanjutnya
+      </button>
+
+      <button
+        type="button"
+        onClick={handleKembali}
+        style={{
+          width: "100%",
+          padding: "10px",
+          marginTop: "10px",
+          backgroundColor: "#6c757d",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer",
+        }}
+      >
+        ← Kembali
       </button>
     </div>
   );
